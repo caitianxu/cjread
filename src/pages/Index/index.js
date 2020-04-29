@@ -1,21 +1,41 @@
 import React from 'react';
-import {View, Text, Button} from 'react-native';
+import {View} from 'react-native';
+import {createStackNavigator} from '@react-navigation/stack';
+import Icons from 'react-native-vector-icons/Ionicons';
+import Home from './home';
 
+const Stack = createStackNavigator();
+const headerRight = (navigation) => {
+  return (
+    <View>
+      <Icons
+        name="md-search"
+        style={{paddingRight: 15, paddingLeft: 15, paddingTop: 5}}
+        size={25}
+        color="#999"
+        onPress={(e) => {
+          navigation.navigate('Search');
+        }}
+      />
+    </View>
+  );
+};
 class Page extends React.Component {
   render() {
     return (
-      <View style={{flex: 1, alignItems: 'center', justifyContent: 'center'}}>
-        <Text>index</Text>
-        <Button
-          title="Go to Details"
-          onPress={() => {
-            this.props.navigation.navigate('Setting', {
-              itemId: 86,
-              otherParam: 'anything you want here',
-            });
+      <Stack.Navigator>
+        <Stack.Screen
+          name="HomeIndex"
+          component={Home}
+          options={({navigation}) => {
+            return {
+              title: '微悦读',
+              headerTintColor: '#fd6655',
+              headerRight: headerRight.bind(this, navigation),
+            };
           }}
         />
-      </View>
+      </Stack.Navigator>
     );
   }
 }
