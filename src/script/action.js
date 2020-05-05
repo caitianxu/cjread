@@ -3,8 +3,8 @@ import HTTP from './request';
 import AsyncStorage from '@react-native-community/async-storage';
 
 //获取缓存
-export const _getCookie = (key) => {
-  return new Promise(function (resolve, reject) {
+export const _getCookie = key => {
+  return new Promise(function(resolve, reject) {
     AsyncStorage.getItem(key, (err, result) => {
       if (!err && result) {
         resolve(JSON.parse(result));
@@ -16,24 +16,25 @@ export const _getCookie = (key) => {
 };
 //存储缓存
 export const _setCookie = (key, value) => {
-  return new Promise(function (resolve, reject) {
+  return new Promise(function(resolve, reject) {
     AsyncStorage.setItem(key, JSON.stringify(value));
     resolve();
   });
 };
 //删除缓存
-export const _delCookie = (key) => {
-  return new Promise(function (resolve, reject) {
+export const _delCookie = key => {
+  return new Promise(function(resolve, reject) {
     AsyncStorage.removeItem(key);
     resolve();
   });
 };
+
 //设备信息
 export const _clear_store_all = () => {
-  return new Promise(function (resolve, reject) {
+  return new Promise(function(resolve, reject) {
     AsyncStorage.clear();
     const action = {
-      type: 'clear_store_all',
+      type: 'clear_store_all'
     };
     store.dispatch(action);
     resolve();
@@ -41,8 +42,8 @@ export const _clear_store_all = () => {
 };
 
 //设备信息
-export const _set_client_info = (param) => {
-  return new Promise(function (resolve, reject) {
+export const _set_client_info = param => {
+  return new Promise(function(resolve, reject) {
     const action = {
       type: 'set_client_info',
       data: {...param},
@@ -53,8 +54,8 @@ export const _set_client_info = (param) => {
 };
 
 //开启 关闭 加载
-export const _set_public_loading = (bool) => {
-  return new Promise(function (resolve, reject) {
+export const _set_public_loading = bool => {
+  return new Promise(function(resolve, reject) {
     const action = {
       type: 'set_public_loading',
       data: bool,
@@ -66,7 +67,7 @@ export const _set_public_loading = (bool) => {
 
 //用户登录
 export const _member_login = (param, callback) => {
-  HTTP.post('/v2/api/mobile/login', param).then((res) => {
+  HTTP.post('/v2/api/mobile/login', param).then(res => {
     if (res.code == 0) {
       const {org_id, token, token_type} = res.data;
       let newParam = {...param, org_id, token, token_type};
@@ -85,7 +86,7 @@ export const _member_login = (param, callback) => {
 
 //用户资料变更
 export const _change_member_info = (param, data) => {
-  return new Promise(function (resolve, reject) {
+  return new Promise(function(resolve, reject) {
     const {org_id, token, token_type} = data;
     let newParam = {...param, org_id, token, token_type};
     _setCookie('memberInfo', newParam);
@@ -100,7 +101,7 @@ export const _change_member_info = (param, data) => {
 
 //用户资料变更
 export const _update_member_info = (param, data) => {
-  return new Promise(function (resolve, reject) {
+  return new Promise(function(resolve, reject) {
     const action = {
       type: 'update_member_info',
       data: {...param},
@@ -108,13 +109,4 @@ export const _update_member_info = (param, data) => {
     store.dispatch(action);
     resolve();
   });
-};
-
-//搜索条件
-export const _change_search_text = (param) => {
-  const action = {
-    type: 'change_search_text',
-    data: param,
-  };
-  store.dispatch(action);
 };

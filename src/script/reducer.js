@@ -7,8 +7,7 @@ const defaultState = {
   client_type: 'QY',
   client: {},
   loading: false,
-  searchText: null,
-  version: '1.0.0.3',
+  version: '1.0.0.3'
 };
 
 export default (state = defaultState, action) => {
@@ -33,9 +32,6 @@ export default (state = defaultState, action) => {
       newState.member = null;
       newState.member_id = null;
       newState.member_token = null;
-      break;
-    case 'change_search_text':
-      newState.searchText = action.data;
       break;
     default:
       break;

@@ -3,7 +3,7 @@ import {
   View,
   Text,
   Image,
-  TextInput,
+  ScrollView,
   FlatList,
   StyleSheet,
   Dimensions,
@@ -13,39 +13,76 @@ import {
 import store from '../../script/store';
 import HTTP from '../../script/request';
 import Util from '../../script/util';
-import AntDesign from 'react-native-vector-icons/AntDesign';
 
 const {width, height} = Dimensions.get('window');
 const styles = StyleSheet.create({
-  container: {
+  safeAreaView: {
     flex: 1,
-    paddingTop: 10,
-    paddingBottom: 10,
+    display: 'flex',
+    flexDirection: 'row',
+    backgroundColor: '#FFFFFF',
+  },
+  cats: {
+    backgroundColor: '#f4f4f4',
+  },
+  content: {
+    width: width * 0.78,
     backgroundColor: '#fff',
+    paddingLeft: 15,
+    paddingTop: 10,
+  },
+  cat: {
+    paddingTop: 8,
+    paddingBottom: 8,
+  },
+  activeCat: {
+    paddingTop: 8,
+    paddingBottom: 8,
+    backgroundColor: '#fff',
+  },
+  text: {
+    paddingLeft: 12,
+    paddingRight: 10,
+    textAlign: 'center'
+  },
+  activeText: {
+    paddingLeft: 12,
+    paddingRight: 10,
+    color: '#fd6655',
+    borderLeftColor: '#fd6655',
+    borderLeftWidth: 3,
+    textAlign: 'center'
+  },
+  rowLine: {
+    height: 1,
+    backgroundColor: '#eee',
+    marginBottom: 10,
+    marginTop: 10,
+  },
+  footer: {
+    alignItems: 'center',
+    paddingRight: 15,
+    marginTop: 10,
+    marginBottom: 10,
   },
   bookRow: {
     display: 'flex',
     flexDirection: 'row',
-    paddingLeft: 10,
-    paddingRight: 10,
-  },
-  bookCoverBorder: {
-    elevation: 5,
-    borderWidth: 1,
-    borderColor: '#fff',
   },
   bookCover: {
-    width: width * 0.3,
-    height: width * 0.4,
+    width: width * 0.2,
+    height: width * 0.28,
     backgroundColor: '#eee',
   },
   bookDetail: {
     flex: 1,
     paddingLeft: 10,
+    paddingRight: 10,
   },
   bookName: {
     color: '#000',
     fontSize: 16,
+    marginBottom: 10,
   },
   bookAuthor: {
     fontSize: 10,
@@ -57,20 +94,6 @@ const styles = StyleSheet.create({
     fontSize: 12,
     textAlign: 'justify',
   },
-  rowLine: {
-    height: 1,
-    backgroundColor: '#eee',
-    marginBottom: 15,
-    marginTop: 15,
-    marginLeft: 10,
-    marginRight: 10,
-  },
-  footer: {
-    alignItems: 'center',
-    paddingRight: 15,
-    marginTop: 10,
-    marginBottom: 10,
-  },
 });
 class Page extends React.Component {
   constructor(props) {
@@ -78,12 +101,12 @@ class Page extends React.Component {
     this.state = {
       base: store.getState(),
       hasMore: true,
+      isLoading: false,
+      isRefresh: false,
       pageNum: 1,
       allData: [],
-      isRefresh: false,
-      isLoading: false,
-      searchText: null,
-      search: null,
+      cats: [],
+      selCat: null,
     };
     store.subscribe(this.storeChange);
   }
@@ -92,40 +115,51 @@ class Page extends React.Component {
       base: store.getState(),
     });
   };
+  componentDidMount() {
+    HTTP.post('/api/hbjt/audio/getAudioCats').then(res => {
+      if (res.code == 0 && res.data.length > 0) {
+        this.setState(
+          {
+            cats: [...res.data],
+          },
+          () => {
+            this._changeCat(res.data[0]);
+          },
+        );
+      }
+    });
+  }
   componentWillUnmount() {
     this.setState = () => {
       return;
     };
   }
-  componentDidMount() {
-    this._loadMoreData();
-  }
-  shouldComponentUpdate(newProps, newState) {
-    if (newState.base.searchText != newState.searchText) {
-      this.setState({
-        searchText: newState.base.searchText,
-        hasMore: true,
+  //修改分类
+  _changeCat = cat => {
+    this.setState(
+      {
         pageNum: 1,
+        hasMore: true,
         allData: [],
-        isLoading: false,
-      },() => {
+        selCat: {...cat},
+      },
+      () => {
         this._loadMoreData();
-      });
-    }
-    return true;
-  }
+      },
+    );
+  };
   //获取列表数据
   _loadMoreData = () => {
-    const {isLoading, hasMore, pageNum, searchText} = this.state;
+    const {isLoading, hasMore, selCat, pageNum} = this.state;
     if (isLoading || !hasMore) return;
     this.setState({
       isLoading: true,
     });
-    HTTP.post('/v2/api/book/getList', {
+    HTTP.post('/api/hbjt/audio/getList', {
       pageSize: 10,
       pageNum: pageNum,
-      searchText: searchText,
-    }).then((res) => {
+      cid: selCat.audio_cat_id,
+    }).then(res => {
       if (res.code === 0 && res.data.rows) {
         let allData = this.state.allData.concat(res.data.rows);
         if (this.state.isRefresh) {
@@ -198,28 +232,23 @@ class Page extends React.Component {
     this.props.navigation.navigate(key, param);
   };
   render() {
-    const {allData} = this.state;
+    const {cats, selCat, allData} = this.state;
     const _renderItemView = ({item}) => {
       return (
         <TouchableOpacity
-          onPress={this._goToPage.bind(this, 'Book', {...item})}>
+          onPress={this._goToPage.bind(this, 'Audio', {...item})}>
           <View style={styles.bookRow}>
-            <View style={styles.bookCoverBorder}>
-              <Image
-                source={{uri: Util.transImgUrl(item.book_cover_small)}}
-                style={styles.bookCover}
-                resizeMode="cover"
-              />
-            </View>
+            <Image
+              source={{uri: Util.transImgUrl(item.cover_url_small)}}
+              style={styles.bookCover}
+              resizeMode="cover"
+            />
             <View style={styles.bookDetail}>
               <Text style={styles.bookName} numberOfLines={2}>
-                {item.book_name}
+                {item.audio_title}
               </Text>
-              <Text style={styles.bookAuthor} numberOfLines={1}>
-                {item.book_author}
-              </Text>
-              <Text style={styles.bookRemark} numberOfLines={6}>
-                {item.book_remark}
+              <Text style={styles.bookRemark} numberOfLines={4}>
+                {item.audio_remark}
               </Text>
             </View>
           </View>
@@ -227,19 +256,45 @@ class Page extends React.Component {
       );
     };
     return (
-      <View style={styles.container}>
-        <FlatList
-          data={allData}
-          renderItem={_renderItemView}
-          keyExtractor={(item, index) => `row-${index}`}
-          ItemSeparatorComponent={() => {
-            return <View style={styles.rowLine}></View>;
-          }}
-          onEndReached={this._reload}
-          ListFooterComponent={this._renderFooter}
-          onRefresh={this._onRefresh}
-          refreshing={false}
-        />
+      <View style={styles.safeAreaView}>
+        <ScrollView style={styles.cats}>
+          {cats.map((cat, index) => {
+            return (
+              <TouchableOpacity
+                key={`cat-${index}`}
+                onPress={this._changeCat.bind(this, cat)}
+                style={
+                  selCat && selCat.audio_cat_id == cat.audio_cat_id
+                    ? styles.activeCat
+                    : styles.cat
+                }>
+                <Text
+                  numberOfLines={1}
+                  style={
+                    selCat && selCat.audio_cat_id == cat.audio_cat_id
+                      ? styles.activeText
+                      : styles.text
+                  }>
+                  {cat.audio_cat_name}
+                </Text>
+              </TouchableOpacity>
+            );
+          })}
+        </ScrollView>
+        <View style={styles.content}>
+          <FlatList
+            data={allData}
+            renderItem={_renderItemView}
+            keyExtractor={(item, index) => `row-${index}`}
+            ItemSeparatorComponent={() => {
+              return <View style={styles.rowLine}></View>;
+            }}
+            onEndReached={this._reload}
+            ListFooterComponent={this._renderFooter}
+            onRefresh={this._onRefresh}
+            refreshing={false}
+          />
+        </View>
       </View>
     );
   }
