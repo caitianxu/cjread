@@ -129,7 +129,7 @@ android {
     }
 
     defaultConfig {
-        applicationId "com.cjread.chuyue"
+        applicationId "com.cjread.tuibook"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 200

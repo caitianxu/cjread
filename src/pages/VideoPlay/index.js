@@ -30,7 +30,7 @@ class Page extends React.Component {
     };
   }
   componentDidMount() {
-    StatusBar.setHidden(true);
+    // StatusBar.setHidden(true);
     this.setState({
       uri: this.props.navigation.state.params.uri,
       title: this.props.navigation.state.params.title,
@@ -38,7 +38,7 @@ class Page extends React.Component {
   }
   componentWillUnmount() {
     // Orientation.lockToPortrait();
-    StatusBar.setHidden(false);
+    // StatusBar.setHidden(false);
     StatusBar.setTranslucent(true);
     StatusBar.setBarStyle('dark-content');
     StatusBar.setBackgroundColor('rgba(0,0,0,0)');

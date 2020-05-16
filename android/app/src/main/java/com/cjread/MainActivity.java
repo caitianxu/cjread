@@ -1,4 +1,4 @@
-package com.cjread.chuyue;
+package com.cjread.tuibook;
 
 import android.os.Bundle;
 import com.facebook.react.ReactActivity;

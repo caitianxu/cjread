@@ -46,7 +46,7 @@ res/values/colors.xml 设置状态栏颜色
 res/values/styles.xml 设置背景透明防止白屏
 MainActivity.java 文件修改
 
-package com.cjread.chuyue;
+package com.cjread.tuibook;
 
 import android.os.Bundle;
 import com.facebook.react.ReactActivity;
